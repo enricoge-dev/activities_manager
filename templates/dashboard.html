@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+    <div class="login-container">
+        <h2>Welcome, {{ username }}!</h2>
+        <p>You are logged in as a {{ role }} user.</p>
+        <p>This is your protected dashboard.</p>
+    </div>
+{% endblock %}

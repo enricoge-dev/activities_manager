@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+
+{% block title %}Add New Event{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card" style="max-width: 800px; margin: auto;">
+        <div class="card-header">
+            <h2>Add New Event</h2>
+        </div>
+        <div class="card-body">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="alert-container">
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+            {% endwith %}
+
+            <form method="POST" action="{{ url_for('add_event') }}" id="event_form">
+                <div class="input-group mb-4">
+                    <label for="event_date">Event Date</label>
+                    <input type="date" id="event_date" name="event_date" class="form-control" value="{{ today_date }}" required>
+                </div>
+
+                <h3 class="mt-4">Time Intervals</h3>
+                <div id="intervals_container">
+                    <!-- Dynamic interval items will be inserted here -->
+                </div>
+
+                <div class="mt-3">
+                    <button type="button" id="add_interval_button" class="btn btn-secondary">
+                        <i class="fas fa-plus-circle"></i> Add Interval
+                    </button>
+                </div>
+
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Save Event
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<template id="interval-template">
+    <div class="interval-item">
+        <button type="button" class="btn btn-sm btn-danger remove-interval-button" title="Remove">
+            <i class="fas fa-trash-alt"></i>
+        </button>
+        <div class="form-row">
+            <div class="col">
+                <label for="start_time_0">Start Time</label>
+                <input type="time" name="start_time" id="start_time_0" class="form-control" required>
+            </div>
+            <div class="col">
+                <label for="end_time_0">End Time</label>
+                <input type="time" name="end_time" id="end_time_0" class="form-control" required>
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="col">
+                <label for="activity_tag_0">Activity Tag</label>
+                <input type="text" name="activity_tag" id="activity_tag_0" class="form-control" list="activity_tags_list" required>
+                <datalist id="activity_tags_list">
+                    {% for tag in activity_tags %}
+                        <option value="{{ tag }}">
+                    {% endfor %}
+                </datalist>
+            </div>
+            <div class="col">
+                <label for="note_0">Note (max 10 chars)</label>
+                <input type="text" name="note" id="note_0" class="form-control" maxlength="10">
+            </div>
+        </div>
+    </div>
+</template>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const container = document.getElementById('intervals_container');
+    const template = document.getElementById('interval-template');
+    let intervalCount = 0;
+
+    function addInterval() {
+        const clone = template.content.cloneNode(true);
+        const intervalItem = clone.querySelector('.interval-item');
+        
+        // Update IDs and names for new item
+        intervalItem.querySelectorAll('input').forEach(input => {
+            const oldId = input.id;
+            const newId = oldId.replace(/_\d+$/, '_' + intervalCount);
+            input.id = newId;
+            // Update label 'for' attribute
+            const label = intervalItem.querySelector(`label[for="${oldId}"]`);
+            if (label) {
+                label.setAttribute('for', newId);
+                label.textContent = label.textContent.replace(/_\d+$/, '_' + intervalCount);
+            }
+        });
+
+        const removeButton = clone.querySelector('.remove-interval-button');
+        removeButton.addEventListener('click', () => {
+            intervalItem.remove();
+        });
+
+        container.appendChild(clone);
+        intervalCount++;
+    }
+
+    // Add one interval by default
+    addInterval();
+
+    document.getElementById('add_interval_button').addEventListener('click', addInterval);
+
+    // Set today's date as default if not already set
+    const eventDateInput = document.getElementById('event_date');
+    if (!eventDateInput.value) {
+        const today = new Date();
+        const yyyy = today.getFullYear();
+        const mm = String(today.getMonth() + 1).padStart(2, '0');
+        const dd = String(today.getDate()).padStart(2, '0');
+        eventDateInput.value = `${yyyy}-${mm}-${dd}`;
+    }
+});
+</script>
+{% endblock %}

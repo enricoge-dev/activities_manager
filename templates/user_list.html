@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+
+{% block title %}User Management{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h2>User Management</h2>
+            <a href="{{ url_for('create_user') }}" class="btn btn-primary">
+                <i class="fas fa-user-plus"></i> Create New User
+            </a>
+        </div>
+        <div class="card-body">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="alert-container">
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+            {% endwith %}
+
+            {% if users %}
+            <form method="post" id="user_actions_form">
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead class="thead-light">
+                            <tr>
+                                <th><input type="checkbox" id="select_all_users"></th>
+                                <th>Username</th>
+                                <th>Role</th>
+                                <th>Must Change Password?</th>
+                                <th class="text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for user in users %}
+                            <tr>
+                                <td><input type="checkbox" name="user_ids" value="{{ user.id }}" class="user-checkbox"></td>
+                                <td>{{ user.username }}</td>
+                                <td>{{ user.role }}</td>
+                                <td>{{ 'Yes' if user.must_change_password else 'No' }}</td>
+                                <td class="text-right">
+                                    <!-- Individual user actions can go here if needed -->
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="mt-3 d-flex gap-2">
+                    <button type="submit" form-action="{{ url_for('delete_selected_users') }}" class="btn btn-danger">
+                        <i class="fas fa-trash-alt"></i> Delete Selected
+                    </button>
+                    <button type="submit" form-action="{{ url_for('toggle_selected_admin') }}" class="btn btn-secondary">
+                        <i class="fas fa-user-shield"></i> Toggle Admin Status
+                    </button>
+                    <button type="submit" form-action="{{ url_for('reset_selected_passwords') }}" class="btn btn-warning">
+                        <i class="fas fa-key"></i> Reset Selected Passwords
+                    </button>
+                </div>
+            </form>
+            {% else %}
+            <p>No users found.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const selectAllCheckbox = document.getElementById('select_all_users');
+    const userCheckboxes = document.querySelectorAll('.user-checkbox');
+    const actionButtons = document.querySelectorAll('button[form-action]');
+    const form = document.getElementById('user_actions_form');
+
+    selectAllCheckbox.addEventListener('change', function() {
+        userCheckboxes.forEach(checkbox => {
+            checkbox.checked = selectAllCheckbox.checked;
+        });
+    });
+
+    actionButtons.forEach(button => {
+        button.addEventListener('click', function(event) {
+            event.preventDefault();
+            const action = this.getAttribute('form-action');
+            form.setAttribute('action', action);
+            form.submit();
+        });
+    });
+});
+</script>
+{% endblock %}
