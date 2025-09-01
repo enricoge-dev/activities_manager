@@ -3,42 +3,71 @@
 {% block title %}Edit Interval{% endblock %}
 
 {% block content %}
-<div class="login-container">
-    <h2>Edit Interval</h2>
-    {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-        <ul class="flashes">
-        {% for category, message in messages %}
-            <li class="{{ category }}">{{ message }}</li>
-        {% endfor %}
-        </ul>
-    {% endif %}
-    {% endwith %}
+<div class="container mt-4">
+    <div class="card" style="max-width: 600px; margin: auto;">
+        <div class="card-header">
+            <h2>Edit Interval</h2>
+        </div>
+        <div class="card-body">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="alert-container">
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+            {% endwith %}
 
-    <form method="post" action="{{ url_for('edit_interval', interval_id=interval.id) }}">
-        <div class="input-group">
-            <label for="start_time">Start Time</label>
-            <input type="time" id="start_time" name="start_time" value="{{ interval.start_time }}" required>
+            <form method="post" action="{{ url_for('edit_interval', interval_id=interval.id) }}">
+                <div class="input-group">
+                    <label for="start_time">Start Time</label>
+                    <input type="time" id="start_time" name="start_time" class="form-control" value="{{ interval.start_time }}" required>
+                </div>
+                <div class="input-group">
+                    <label for="end_time">End Time</label>
+                    <input type="time" id="end_time" name="end_time" class="form-control" value="{{ interval.end_time }}" required>
+                </div>
+                <div class="input-group">
+                    <label for="note">Note (max 10 characters)</label>
+                    <input type="text" id="note" name="note" class="form-control" value="{{ interval.note }}" maxlength="10">
+                </div>
+                <div class="input-group">
+                    <label for="activity_tag">Activity Tag</label>
+                    <input list="activity_tags_list" id="activity_tag" name="activity_tag" class="form-control" value="{{ interval.activity_tag }}" required>
+                    <datalist id="activity_tags_list">
+                        {% for tag in activity_tags %}
+                            <option value="{{ tag }}">
+                        {% endfor %}
+                    </datalist>
+                </div>
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Update Interval
+                    </button>
+                    <a href="{{ url_for('list_events') }}" class="btn btn-secondary">
+                        <i class="fas fa-times-circle"></i> Cancel
+                    </a>
+                </div>
+            </form>
         </div>
-        <div class="input-group">
-            <label for="end_time">End Time</label>
-            <input type="time" id="end_time" name="end_time" value="{{ interval.end_time }}" required>
-        </div>
-        <div class="input-group">
-            <label for="note">Note (max 10 characters)</label>
-            <input type="text" id="note" name="note" value="{{ interval.note }}" maxlength="10">
-        </div>
-        <div class="input-group">
-            <label for="activity_tag">Activity Tag</label>
-            <input list="activity_tags_list" id="activity_tag" name="activity_tag" value="{{ interval.activity_tag }}" required>
-            <datalist id="activity_tags_list">
-                {% for tag in activity_tags %}
-                    <option value="{{ tag }}">
-                {% endfor %}
-            </datalist>
-        </div>
-        <button type="submit">Update Interval</button>
-        <a href="{{ url_for('list_events') }}" class="button">Cancel</a>
-    </form>
+    </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const activityTagInput = document.getElementById('activity_tag');
+    
+    activityTagInput.addEventListener('focus', function() {
+        // Store the current value
+        const currentValue = this.value;
+        // Temporarily clear the value to show all datalist options
+        this.value = '';
+        // Restore the value after a short delay
+        setTimeout(() => {
+            this.value = currentValue;
+        }, 0);
+    });
+});
+</script>
 {% endblock %}
